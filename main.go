@@ -18,6 +18,7 @@ func main()  {
 	dbURL := os.Getenv("DB_URL")
 	port := os.Getenv("PORT")
 	filepathRoot := os.Getenv("FILEPATH_ROOT")
+	platform := os.Getenv("PLATFORM")
 
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
@@ -36,6 +37,7 @@ func main()  {
 	apiCfg := apiConfig{ 
 		fileserverHits: atomic.Int32{},
 		db: dbQueries,
+		platform: platform,
 	}
 
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
@@ -45,6 +47,8 @@ func main()  {
 	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
 
 	mux.HandleFunc("POST /api/validate_chirp", handlerValidateChirp)
+
+	mux.HandleFunc("POST /api/users", apiCfg.handlerCreateUser)
 
 	appHandler := http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))
 	mux.Handle("/app/", apiCfg.middlewareMetricsInc(appHandler))
