@@ -12,7 +12,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func main()  {
+func main() {
 	godotenv.Load()
 
 	dbURL := os.Getenv("DB_URL")
@@ -27,17 +27,17 @@ func main()  {
 
 	dbQueries := database.New(db)
 
-	mux := http.NewServeMux()	
+	mux := http.NewServeMux()
 
 	server := http.Server{
-		Addr: ":" + port,
+		Addr:    ":" + port,
 		Handler: mux,
 	}
 
-	apiCfg := apiConfig{ 
+	apiCfg := apiConfig{
 		fileserverHits: atomic.Int32{},
-		db: dbQueries,
-		platform: platform,
+		db:             dbQueries,
+		platform:       platform,
 	}
 
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
@@ -46,7 +46,8 @@ func main()  {
 
 	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
 
-	mux.HandleFunc("POST /api/validate_chirp", handlerValidateChirp)
+	// mux.HandleFunc("POST /api/validate_chirp", handlerValidateChirp)
+	mux.HandleFunc("POST /api/chirps", apiCfg.handlerCreateChirp)
 
 	mux.HandleFunc("POST /api/users", apiCfg.handlerCreateUser)
 
