@@ -49,6 +49,8 @@ func main() {
 	// mux.HandleFunc("POST /api/validate_chirp", handlerValidateChirp)
 	mux.HandleFunc("POST /api/chirps", apiCfg.handlerCreateChirp)
 
+	mux.HandleFunc("GET /api/chirps", apiCfg.handlerGetChirps)
+
 	mux.HandleFunc("POST /api/users", apiCfg.handlerCreateUser)
 
 	appHandler := http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))
