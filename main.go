@@ -19,6 +19,7 @@ func main() {
 	port := os.Getenv("PORT")
 	filepathRoot := os.Getenv("FILEPATH_ROOT")
 	platform := os.Getenv("PLATFORM")
+	jwtSecret := os.Getenv("JWT_SECRET")
 
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
@@ -38,6 +39,7 @@ func main() {
 		fileserverHits: atomic.Int32{},
 		db:             dbQueries,
 		platform:       platform,
+		jwtSecret:      jwtSecret,
 	}
 
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
