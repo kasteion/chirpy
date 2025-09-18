@@ -79,6 +79,7 @@ func (cfg *apiConfig) handlerCreateChirp(w http.ResponseWriter, r *http.Request)
 	userID, err := auth.ValidateJWT(token, cfg.jwtSecret)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, err.Error(), err)
+		return
 	}
 
 	decoder := json.NewDecoder(r.Body)
