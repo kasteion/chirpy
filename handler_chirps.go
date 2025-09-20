@@ -13,7 +13,7 @@ import (
 )
 
 type CreateChirpParameters struct {
-	Body   string    `json:"body"`
+	Body string `json:"body"`
 }
 
 type Chirp struct {
@@ -136,7 +136,7 @@ func (cfg *apiConfig) handlerDeleteChirp(w http.ResponseWriter, r *http.Request)
 	chirpID := r.PathValue("chirpID")
 	id, err := uuid.Parse(chirpID)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Expecting uuid", err )
+		respondWithError(w, http.StatusBadRequest, "Expecting uuid", err)
 		return
 	}
 
