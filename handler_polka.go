@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/kasteion/chirpy/internal/auth"
 	"github.com/kasteion/chirpy/internal/database"
 )
 
@@ -16,9 +17,16 @@ func (cfg *apiConfig) handlerPolkaWebhooks(w http.ResponseWriter, r *http.Reques
 		} `json:"data"`
 	}
 
+	apiKey, err := auth.GetAPIKey(r.Header)
+	if err != nil || apiKey != cfg.polkaKey {
+		respondWithError(w, http.StatusUnauthorized, "Unauthorized", err)
+		return
+	}
+
+
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
-	err := decoder.Decode(&params)
+	err = decoder.Decode(&params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
 		return
@@ -30,7 +38,7 @@ func (cfg *apiConfig) handlerPolkaWebhooks(w http.ResponseWriter, r *http.Reques
 	}
 
 	_, err = cfg.db.UpdateIsChirpyRedByID(r.Context(), database.UpdateIsChirpyRedByIDParams{
-		ID: params.Data.UserID,
+		ID:          params.Data.UserID,
 		IsChirpyRed: true,
 	})
 	if err != nil {
