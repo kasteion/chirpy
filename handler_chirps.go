@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -55,10 +56,10 @@ func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authorIDQuery := r.URL.Query().Get("author_id")
+	authorIDParam := r.URL.Query().Get("author_id")
 	authorID := uuid.Nil
-	if authorIDQuery != "" {
-		authorID, err = uuid.Parse(authorIDQuery)
+	if authorIDParam != "" {
+		authorID, err = uuid.Parse(authorIDParam)
 		if err != nil {
 			respondWithError(w, http.StatusBadRequest, "Expecting uuid author_id", err)
 			return
@@ -79,6 +80,11 @@ func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
 			UserID:    dbChirp.UserID,
 		})
 		
+	}
+
+	sortParam := r.URL.Query().Get("sort")
+	if sortParam == "desc" {
+		sort.Slice(data, func(i, j int) bool { return data[i].CreatedAt.After(data[j].CreatedAt)})
 	}
 
 	respondWithJSON(w, http.StatusOK, data)
