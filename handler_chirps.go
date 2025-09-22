@@ -49,21 +49,36 @@ func (cfg *apiConfig) handlerGetChirp(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, r *http.Request) {
-	chirps, err := cfg.db.GetChirps(r.Context())
+	dbChirps, err := cfg.db.GetChirps(r.Context())
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't get chirps", err)
 		return
 	}
 
-	data := make([]Chirp, len(chirps))
-	for i, chirp := range chirps {
-		data[i] = Chirp{
-			ID:        chirp.ID,
-			CreatedAt: chirp.CreatedAt,
-			UpdatedAt: chirp.UpdatedAt,
-			Body:      chirp.Body,
-			UserID:    chirp.UserID,
+	authorIDQuery := r.URL.Query().Get("author_id")
+	authorID := uuid.Nil
+	if authorIDQuery != "" {
+		authorID, err = uuid.Parse(authorIDQuery)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "Expecting uuid author_id", err)
+			return
 		}
+	}
+
+	data := []Chirp{}
+	for _, dbChirp := range dbChirps {
+		if authorID != uuid.Nil && dbChirp.UserID != authorID {
+			continue
+		}
+
+		data = append(data, Chirp{
+			ID:        dbChirp.ID,
+			CreatedAt: dbChirp.CreatedAt,
+			UpdatedAt: dbChirp.UpdatedAt,
+			Body:      dbChirp.Body,
+			UserID:    dbChirp.UserID,
+		})
+		
 	}
 
 	respondWithJSON(w, http.StatusOK, data)
